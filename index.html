@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SIUUU — A Tribute to No. 7</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&family=Barlow:ital,wght@0,400;0,500;0,600;0,700;1,600&family=Barlow+Condensed:wght@500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+  :root{
+    --black:#0a0a0c;
+    --charcoal:#141417;
+    --red:#e10600;
+    --red-deep:#8c0700;
+    --gold:#d4af37;
+    --gold-soft:#f2d879;
+    --white:#f5f4f0;
+    --green:#046a38;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--black);
+    color:var(--white);
+    font-family:'Barlow', sans-serif;
+    overflow-x:hidden;
+    cursor:default;
+  }
+  ::selection{background:var(--red);color:var(--white);}
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important;}
+  }
+
+  /* ---------- ambient canvas ---------- */
+  #bg-canvas{position:fixed;inset:0;z-index:0;pointer-events:none;}
+  #burst-canvas{position:fixed;inset:0;z-index:40;pointer-events:none;}
+
+  /* ---------- background photo layer ---------- */
+  .bg-photo{
+    position:fixed;inset:0;z-index:-1;
+    overflow:hidden;
+  }
+  .bg-photo img{
+    width:100%;height:100%;object-fit:cover;object-position:center top;
+    opacity:0.55;
+    filter:grayscale(20%) contrast(1.05);
+  }
+  .bg-photo::after{
+    content:'';position:absolute;inset:0;
+    background:
+      linear-gradient(180deg, rgba(10,10,12,0.55) 0%, rgba(10,10,12,0.85) 55%, var(--black) 100%),
+      linear-gradient(90deg, rgba(10,10,12,0.9) 0%, rgba(10,10,12,0.2) 30%, rgba(10,10,12,0.2) 70%, rgba(10,10,12,0.9) 100%);
+  }
+
+  /* ---------- nav ---------- */
+  nav{
+    position:fixed;top:0;left:0;right:0;z-index:30;
+    display:flex;justify-content:space-between;align-items:center;
+    padding:26px 5vw;
+    mix-blend-mode:difference;
+  }
+  .brand{font-family:'Anton',sans-serif;font-size:1.1rem;letter-spacing:0.12em;}
+  .brand span{color:var(--gold);}
+  nav ul{list-style:none;display:flex;gap:36px;}
+  nav a{color:var(--white);text-decoration:none;font-size:0.85rem;letter-spacing:0.14em;text-transform:uppercase;font-weight:600;}
+
+  /* ---------- hero ---------- */
+  .hero{
+    position:relative;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+    z-index:5;
+    padding:0 5vw;
+  }
+  .ghost-seven{
+    position:absolute;
+    font-family:'Anton',sans-serif;
+    font-size:min(72vw, 62rem);
+    line-height:1;
+    color:transparent;
+    -webkit-text-stroke:1.5px rgba(212,175,55,0.16);
+    z-index:0;
+    user-select:none;
+    top:50%;left:50%;
+    transform:translate(-50%,-52%);
+    animation:ghostPulse 8s ease-in-out infinite;
+  }
+  @keyframes ghostPulse{
+    0%,100%{ -webkit-text-stroke:1.5px rgba(212,175,55,0.14); }
+    50%{ -webkit-text-stroke:1.5px rgba(225,6,0,0.18); }
+  }
+  .eyebrow{
+    z-index:2;
+    font-family:'Barlow Condensed', sans-serif;
+    letter-spacing:0.45em;
+    text-transform:uppercase;
+    font-size:0.78rem;
+    color:var(--gold-soft);
+    margin-bottom:22px;
+    opacity:0;
+    animation:fadeUp 1s ease forwards 0.2s;
+  }
+  h1.name{
+    z-index:2;
+    font-family:'Anton',sans-serif;
+    font-size:clamp(2.6rem, 8vw, 6.2rem);
+    line-height:0.95;
+    letter-spacing:0.01em;
+    text-transform:uppercase;
+    opacity:0;
+    animation:fadeUp 1s ease forwards 0.45s;
+  }
+  h1.name em{
+    font-style:normal;
+    color:var(--red);
+    -webkit-text-stroke:0;
+  }
+  .tagline{
+    z-index:2;
+    max-width:640px;
+    margin-top:22px;
+    font-size:1.05rem;
+    color:#c9c8c4;
+    font-weight:500;
+    opacity:0;
+    animation:fadeUp 1s ease forwards 0.7s;
+  }
+  .scroll-hint{
+    position:absolute;bottom:36px;left:50%;transform:translateX(-50%);
+    font-size:0.7rem;letter-spacing:0.3em;text-transform:uppercase;color:#8a8a86;
+    display:flex;flex-direction:column;align-items:center;gap:8px;
+    z-index:2;
+  }
+  .scroll-hint .line{width:1px;height:34px;background:linear-gradient(var(--gold),transparent);animation:scrollLine 1.8s ease-in-out infinite;}
+  @keyframes scrollLine{0%{transform:scaleY(0);transform-origin:top;}50%{transform:scaleY(1);transform-origin:top;}51%{transform-origin:bottom;}100%{transform:scaleY(0);transform-origin:bottom;}}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:translateY(0);}}
+
+  /* ---------- section shell ---------- */
+  section{position:relative;z-index:5;padding:130px 5vw;}
+  .section-head{max-width:760px;margin:0 auto 70px;text-align:center;}
+  .section-head .kicker{
+    font-family:'Barlow Condensed',sans-serif;
+    letter-spacing:0.35em;text-transform:uppercase;font-size:0.75rem;color:var(--red);
+    margin-bottom:14px;
+  }
+  .section-head h2{
+    font-family:'Anton',sans-serif;font-size:clamp(2rem,4.2vw,3.4rem);text-transform:uppercase;
+  }
+
+  /* ---------- stats ---------- */
+  .stats-grid{
+    max-width:1100px;margin:0 auto;
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+    gap:1px;background:rgba(255,255,255,0.08);
+    border:1px solid rgba(255,255,255,0.08);
+  }
+  .stat-card{
+    background:var(--black);
+    padding:42px 20px;
+    text-align:center;
+  }
+  .stat-num{
+    font-family:'Anton',sans-serif;
+    font-size:clamp(2.4rem,4.5vw,3.6rem);
+    color:var(--gold);
+    line-height:1;
+  }
+  .stat-label{
+    margin-top:12px;font-size:0.8rem;letter-spacing:0.12em;text-transform:uppercase;color:#b8b7b3;
+  }
+
+  /* ---------- timeline ---------- */
+  .timeline{
+    max-width:1100px;margin:0 auto;
+    display:flex;overflow-x:auto;gap:0;
+    scrollbar-width:thin;scrollbar-color:var(--red) transparent;
+    padding-bottom:20px;
+  }
+  .timeline::-webkit-scrollbar{height:6px;}
+  .timeline::-webkit-scrollbar-thumb{background:var(--red);}
+  .club{
+    flex:0 0 240px;
+    padding:28px 26px;
+    border-left:2px solid rgba(255,255,255,0.12);
+    position:relative;
+  }
+  .club:first-child{border-left:2px solid var(--gold);}
+  .club .years{font-family:'Barlow Condensed',sans-serif;color:var(--gold-soft);font-size:0.85rem;letter-spacing:0.1em;}
+  .club h3{font-family:'Anton',sans-serif;font-size:1.5rem;margin:8px 0 10px;text-transform:uppercase;}
+  .club p{font-size:0.88rem;color:#b8b7b3;line-height:1.5;}
+  .club::before{
+    content:'';position:absolute;left:-6px;top:32px;width:10px;height:10px;border-radius:50%;background:var(--red);
+  }
+
+  /* ---------- trophies ---------- */
+  .trophy-grid{
+    max-width:1100px;margin:0 auto;
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));
+    gap:18px;
+  }
+  .trophy{
+    background:var(--charcoal);
+    border:1px solid rgba(212,175,55,0.18);
+    padding:30px 22px;
+    transition:transform 0.35s ease, border-color 0.35s ease, background 0.35s ease;
+    transform-style:preserve-3d;
+  }
+  .trophy:hover{
+    transform:translateY(-6px) rotateX(4deg);
+    border-color:var(--gold);
+    background:#1b1a1d;
+  }
+  .trophy .count{font-family:'Anton',sans-serif;color:var(--white);font-size:2.6rem;}
+  .trophy .count span{color:var(--red);}
+  .trophy .label{margin-top:10px;font-size:0.85rem;letter-spacing:0.08em;text-transform:uppercase;color:#b8b7b3;}
+
+  /* ---------- SIU signature section ---------- */
+  .siu-section{
+    text-align:center;
+    padding:150px 5vw 180px;
+    position:relative;
+    overflow:hidden;
+  }
+  .siu-stage{
+    position:relative;
+    width:100%;
+    max-width:420px;
+    height:420px;
+    margin:0 auto 30px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .siu-btn{
+    background:var(--red);
+    color:var(--white);
+    border:none;
+    font-family:'Anton',sans-serif;
+    font-size:1.2rem;
+    letter-spacing:0.08em;
+    padding:20px 48px;
+    text-transform:uppercase;
+    cursor:pointer;
+    position:relative;
+    z-index:3;
+    transition:transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+    box-shadow:0 0 0 rgba(225,6,0,0.4);
+  }
+  .siu-btn:hover{transform:translateY(-3px) scale(1.03);box-shadow:0 10px 30px rgba(225,6,0,0.35);}
+  .siu-btn:active{transform:translateY(0) scale(0.98);}
+
+  .siu-shout{
+    position:absolute;
+    font-family:'Anton',sans-serif;
+    font-size:clamp(3rem,14vw,9rem);
+    color:var(--gold);
+    opacity:0;
+    letter-spacing:0.02em;
+    -webkit-text-stroke:2px var(--red-deep);
+    pointer-events:none;
+    z-index:5;
+  }
+  .siu-shout.play{
+    animation:shoutPop 1.4s cubic-bezier(.2,1.4,.4,1) forwards;
+  }
+  @keyframes shoutPop{
+    0%{opacity:0;transform:scale(0.3) rotate(-6deg);}
+    18%{opacity:1;transform:scale(1.12) rotate(2deg);}
+    30%{transform:scale(1) rotate(0deg);}
+    75%{opacity:1;}
+    100%{opacity:0;transform:scale(1.3) rotate(1deg) translateY(-30px);}
+  }
+
+  .siu-gif{
+    position:absolute;
+    max-width:300px;max-height:340px;
+    width:auto;height:auto;
+    border-radius:10px;
+    opacity:0;
+    transform:scale(0.9);
+    z-index:4;
+    box-shadow:0 20px 60px rgba(0,0,0,0.5);
+    transition:opacity 0.25s ease, transform 0.25s ease;
+  }
+  .siu-gif.play{
+    opacity:1;
+    transform:scale(1);
+  }
+
+  .celebrant{
+    position:relative;
+    width:120px;height:220px;
+    z-index:4;
+  }
+  .celebrant svg{width:100%;height:100%;overflow:visible;}
+  .cel-arm-l, .cel-arm-r, .cel-torso, .cel-leg-l, .cel-leg-r{
+    transform-origin:60px 90px;
+    transition:transform 0.15s linear;
+  }
+  .celebrant.jump .cel-torso{ animation:torsoJump 1.4s ease forwards; }
+  .celebrant.jump .cel-arm-l{ animation:armLOut 1.4s ease forwards; }
+  .celebrant.jump .cel-arm-r{ animation:armROut 1.4s ease forwards; }
+  .celebrant.jump .cel-leg-l{ animation:legL 1.4s ease forwards; }
+  .celebrant.jump .cel-leg-r{ animation:legR 1.4s ease forwards; }
+
+  @keyframes torsoJump{
+    0%{transform:translateY(0) rotate(0deg);}
+    30%{transform:translateY(-38px) rotate(-4deg);}
+    55%{transform:translateY(-46px) rotate(3deg);}
+    100%{transform:translateY(-40px) rotate(0deg);}
+  }
+  @keyframes armLOut{
+    0%{transform:rotate(70deg);}
+    35%{transform:rotate(-25deg) translateY(-38px);}
+    100%{transform:rotate(-20deg) translateY(-40px);}
+  }
+  @keyframes armROut{
+    0%{transform:rotate(-70deg);}
+    35%{transform:rotate(25deg) translateY(-38px);}
+    100%{transform:rotate(20deg) translateY(-40px);}
+  }
+  @keyframes legL{
+    0%{transform:rotate(0deg);}
+    35%{transform:translateY(-38px) rotate(-8deg);}
+    100%{transform:translateY(-40px) rotate(-6deg);}
+  }
+  @keyframes legR{
+    0%{transform:rotate(0deg);}
+    35%{transform:translateY(-38px) rotate(10deg);}
+    100%{transform:translateY(-40px) rotate(8deg);}
+  }
+
+  .siu-caption{max-width:520px;margin:0 auto;color:#b8b7b3;font-size:0.95rem;}
+
+  footer{
+    position:relative;z-index:5;
+    text-align:center;
+    padding:60px 5vw 50px;
+    border-top:1px solid rgba(255,255,255,0.08);
+    color:#7a7975;
+    font-size:0.8rem;
+    letter-spacing:0.08em;
+  }
+  footer strong{color:var(--gold);}
+
+  @media (max-width:640px){
+    nav ul{display:none;}
+    section{padding:90px 6vw;}
+    .siu-stage{height:340px;}
+  }
+</style>
+</head>
+<body>
+
+<!-- afsal please add here.. (put your Ronaldo background photo file/URL in the src below) -->
+<div class="bg-photo">
+  <img src="https://4kwallpapers.com/images/walls/thumbs_3t/15806.jpg" alt="Cristiano Ronaldo" onerror="this.parentElement.style.display='none'">
+</div>
+
+<canvas id="bg-canvas"></canvas>
+<canvas id="burst-canvas"></canvas>
+
+<nav>
+  <div class="brand">CR<span>7</span> · TRIBUTE</div>
+  <ul>
+    <li><a href="#stats">Numbers</a></li>
+    <li><a href="#timeline">Journey</a></li>
+    <li><a href="#trophies">Honours</a></li>
+    <li><a href="#siu">Siuuu</a></li>
+  </ul>
+</nav>
+
+<section class="hero">
+  <div class="ghost-seven">7</div>
+  <div class="eyebrow">Fan Tribute · Est. Devotion 2003</div>
+  <h1 class="name">CRISTIANO<br><em>RONALDO</em></h1>
+  <p class="tagline">Sporting. Manchester. Madrid. Turin. Riyadh. Portugal. Different shirts,
+    same relentlessness — the player who turned "impossible" into a stat line.</p>
+  <div class="scroll-hint"><span>Scroll</span><span class="line"></span></div>
+</section>
+
+<section id="stats">
+  <div class="section-head">
+    <div class="kicker">By The Numbers</div>
+    <h2>A Career Built on Excess</h2>
+  </div>
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-num" data-target="930">0</div><div class="stat-label">Career Goals*</div></div>
+    <div class="stat-card"><div class="stat-num" data-target="5">0</div><div class="stat-label">Ballon d'Or</div></div>
+    <div class="stat-card"><div class="stat-num" data-target="5">0</div><div class="stat-label">Champions Leagues</div></div>
+    <div class="stat-card"><div class="stat-num" data-target="212">0</div><div class="stat-label">Portugal Caps*</div></div>
+    <div class="stat-card"><div class="stat-num" data-target="130">0</div><div class="stat-label">Int'l Goals*</div></div>
+    <div class="stat-card"><div class="stat-num" data-target="4">0</div><div class="stat-label">Golden Boots</div></div>
+  </div>
+  <p style="text-align:center;margin-top:26px;font-size:0.75rem;color:#77766f;">*approximate career figures, fan-compiled</p>
+</section>
+
+<section id="timeline">
+  <div class="section-head">
+    <div class="kicker">The Journey</div>
+    <h2>Six Shirts, One Standard</h2>
+  </div>
+  <div class="timeline">
+    <div class="club"><div class="years">2002 – 2003</div><h3>Sporting CP</h3><p>The academy graduate who terrified Manchester United in a single friendly.</p></div>
+    <div class="club"><div class="years">2003 – 2009</div><h3>Manchester United</h3><p>Stepover magic turns into end product. First Ballon d'Or, first Champions League.</p></div>
+    <div class="club"><div class="years">2009 – 2018</div><h3>Real Madrid</h3><p>The record-breaking peak — four Champions Leagues in five seasons, all-time top scorer.</p></div>
+    <div class="club"><div class="years">2018 – 2021</div><h3>Juventus</h3><p>Serie A titles and the bicycle kick applauded by the away end.</p></div>
+    <div class="club"><div class="years">2021 – 2023</div><h3>Man United II / Al-Nassr</h3><p>A return home, then a new frontier in Saudi Arabia — still chasing every record left.</p></div>
+    <div class="club"><div class="years">2003 – Present</div><h3>Portugal</h3><p>Captain, all-time leading scorer for any national team, Euro 2016 champion.</p></div>
+  </div>
+</section>
+
+<section id="trophies">
+  <div class="section-head">
+    <div class="kicker">Honours Cabinet</div>
+    <h2>Silverware, Stacked</h2>
+  </div>
+  <div class="trophy-grid">
+    <div class="trophy"><div class="count"><span>5</span>x</div><div class="label">Champions League</div></div>
+    <div class="trophy"><div class="count"><span>5</span>x</div><div class="label">Ballon d'Or</div></div>
+    <div class="trophy"><div class="count"><span>7</span>x</div><div class="label">League Titles</div></div>
+    <div class="trophy"><div class="count"><span>1</span>x</div><div class="label">UEFA Euro Champion</div></div>
+    <div class="trophy"><div class="count"><span>1</span>x</div><div class="label">UEFA Nations League</div></div>
+    <div class="trophy"><div class="count"><span>4</span>x</div><div class="label">European Golden Shoe</div></div>
+  </div>
+</section>
+
+<section id="siu" class="siu-section">
+  <div class="section-head">
+    <div class="kicker">The Signature</div>
+    <h2>Every Great Goal Deserves One</h2>
+  </div>
+  <div class="siu-stage">
+    <div class="siu-shout" id="shoutText">SIUUU!</div>
+
+    <!-- afsal please add here.. (put your Ronaldo "Siuuu" GIF file/URL in the src below) -->
+    <img id="siuGif" class="siu-gif" src="https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExbnE0MXBuenZqN2J1c2gxazlpZTd5bXo2ZHA2eHM5bjRicTB6bWs0dCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/hryis7A55UXZNCUTNA/giphy.webp" alt="Ronaldo Siuuu celebration"
+         onerror="this.style.display='none'; document.getElementById('celebrant').style.display='flex';">
+
+    <div class="celebrant" id="celebrant">
+      <svg viewBox="0 0 120 220">
+        <g class="cel-torso">
+          <circle cx="60" cy="30" r="16" fill="#f2d879"/>
+          <rect x="44" y="48" width="32" height="60" rx="10" fill="#e10600"/>
+        </g>
+        <g class="cel-arm-l">
+          <rect x="44" y="52" width="12" height="55" rx="6" fill="#e10600" transform="translate(-6,0)"/>
+        </g>
+        <g class="cel-arm-r">
+          <rect x="64" y="52" width="12" height="55" rx="6" fill="#e10600" transform="translate(6,0)"/>
+        </g>
+        <g class="cel-leg-l">
+          <rect x="46" y="104" width="13" height="70" rx="6" fill="#141417"/>
+        </g>
+        <g class="cel-leg-r">
+          <rect x="61" y="104" width="13" height="70" rx="6" fill="#141417"/>
+        </g>
+      </svg>
+    </div>
+  </div>
+  <button class="siu-btn" id="siuBtn">Trigger the Celebration</button>
+  <p class="siu-caption">Click it. Arms out, chin up, net still rippling — the most copied celebration in football.</p>
+</section>
+
+<footer>
+  Built by a fan, for fans. Not affiliated with Cristiano Ronaldo or any club. <strong>GOAT debates in the comments only.</strong>
+</footer>
+
+<script>
+/* ============ THREE.JS AMBIENT PARTICLE FIELD ============ */
+(function(){
+  const canvas = document.getElementById('bg-canvas');
+  const renderer = new THREE.WebGLRenderer({canvas, alpha:true, antialias:true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 100);
+  camera.position.z = 12;
+
+  const COUNT = 900;
+  const positions = new Float32Array(COUNT*3);
+  const colors = new Float32Array(COUNT*3);
+  const palette = [
+    new THREE.Color(0xd4af37), // gold
+    new THREE.Color(0xe10600), // red
+    new THREE.Color(0xf5f4f0), // white
+  ];
+  for(let i=0;i<COUNT;i++){
+    positions[i*3]   = (Math.random()-0.5)*30;
+    positions[i*3+1] = (Math.random()-0.5)*20;
+    positions[i*3+2] = (Math.random()-0.5)*20;
+    const c = palette[Math.floor(Math.random()*palette.length)];
+    colors[i*3]=c.r; colors[i*3+1]=c.g; colors[i*3+2]=c.b;
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(positions,3));
+  geo.setAttribute('color', new THREE.BufferAttribute(colors,3));
+  const mat = new THREE.PointsMaterial({size:0.06, vertexColors:true, transparent:true, opacity:0.75, depthWrite:false});
+  const points = new THREE.Points(geo, mat);
+  scene.add(points);
+
+  let mouseX=0, mouseY=0;
+  window.addEventListener('mousemove', e=>{
+    mouseX = (e.clientX/window.innerWidth - 0.5);
+    mouseY = (e.clientY/window.innerHeight - 0.5);
+  });
+
+  function animate(){
+    requestAnimationFrame(animate);
+    points.rotation.y += 0.0009;
+    points.rotation.x += 0.0002;
+    camera.position.x += (mouseX*2 - camera.position.x)*0.02;
+    camera.position.y += (-mouseY*2 - camera.position.y)*0.02;
+    camera.lookAt(scene.position);
+    renderer.render(scene, camera);
+  }
+  animate();
+
+  window.addEventListener('resize', ()=>{
+    camera.aspect = window.innerWidth/window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+})();
+
+/* ============ THREE.JS "SIUUU" PARTICLE BURST ============ */
+(function(){
+  const canvas = document.getElementById('burst-canvas');
+  const renderer = new THREE.WebGLRenderer({canvas, alpha:true, antialias:true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(50, window.innerWidth/window.innerHeight, 0.1, 100);
+  camera.position.z = 10;
+
+  let burst = null;
+  let velocities = [];
+  let life = 0;
+  const MAX_LIFE = 90;
+
+  function spawnBurst(){
+    if(burst) scene.remove(burst);
+    const N = 260;
+    const positions = new Float32Array(N*3);
+    const colors = new Float32Array(N*3);
+    velocities = [];
+    const palette = [new THREE.Color(0xe10600), new THREE.Color(0xd4af37), new THREE.Color(0xf5f4f0)];
+    for(let i=0;i<N;i++){
+      positions[i*3]=0; positions[i*3+1]=-1; positions[i*3+2]=0;
+      const c = palette[Math.floor(Math.random()*palette.length)];
+      colors[i*3]=c.r; colors[i*3+1]=c.g; colors[i*3+2]=c.b;
+      const theta = Math.random()*Math.PI*2;
+      const phi = Math.random()*Math.PI;
+      const speed = 0.05 + Math.random()*0.09;
+      velocities.push(new THREE.Vector3(
+        Math.sin(phi)*Math.cos(theta)*speed,
+        Math.abs(Math.sin(phi)*Math.sin(theta)*speed) + 0.04,
+        Math.cos(phi)*speed*0.5
+      ));
+    }
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(positions,3));
+    geo.setAttribute('color', new THREE.BufferAttribute(colors,3));
+    const mat = new THREE.PointsMaterial({size:0.14, vertexColors:true, transparent:true, opacity:1, depthWrite:false});
+    burst = new THREE.Points(geo, mat);
+    scene.add(burst);
+    life = MAX_LIFE;
+  }
+
+  function animate(){
+    requestAnimationFrame(animate);
+    if(burst && life>0){
+      const pos = burst.geometry.attributes.position;
+      for(let i=0;i<velocities.length;i++){
+        pos.array[i*3]   += velocities[i].x;
+        pos.array[i*3+1] += velocities[i].y;
+        pos.array[i*3+2] += velocities[i].z;
+        velocities[i].y -= 0.0025; // gravity
+      }
+      pos.needsUpdate = true;
+      life--;
+      burst.material.opacity = Math.max(0, life/MAX_LIFE);
+    }
+    renderer.render(scene, camera);
+  }
+  animate();
+
+  window.addEventListener('resize', ()=>{
+    camera.aspect = window.innerWidth/window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+
+  window.__triggerBurst = spawnBurst;
+})();
+
+/* ============ SIU BUTTON WIRING ============ */
+const siuBtn = document.getElementById('siuBtn');
+const celebrant = document.getElementById('celebrant');
+const shoutText = document.getElementById('shoutText');
+const siuGif = document.getElementById('siuGif');
+let gifLoaded = false;
+
+siuGif.addEventListener('load', ()=>{
+  gifLoaded = true;
+  celebrant.style.display = 'none'; // real gif is present, hide the SVG fallback
+});
+
+siuBtn.addEventListener('click', ()=>{
+  shoutText.classList.remove('play');
+  void shoutText.offsetWidth; // reflow to restart animation
+  shoutText.classList.add('play');
+
+  if(gifLoaded){
+    siuGif.classList.remove('play');
+    void siuGif.offsetWidth;
+    siuGif.classList.add('play');
+    siuGif.src = siuGif.src.split('?')[0] + '?t=' + Date.now(); // restart gif playback
+  } else {
+    celebrant.classList.remove('jump');
+    void celebrant.offsetWidth;
+    celebrant.classList.add('jump');
+  }
+
+  if(window.__triggerBurst) window.__triggerBurst();
+  siuBtn.textContent = 'SIUUUUUU!';
+  setTimeout(()=>{ siuBtn.textContent = 'Trigger the Celebration'; }, 1600);
+});
+
+/* ============ COUNT-UP STATS ON SCROLL ============ */
+const statEls = document.querySelectorAll('.stat-num');
+const seen = new Set();
+const observer = new IntersectionObserver((entries)=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting && !seen.has(entry.target)){
+      seen.add(entry.target);
+      const target = parseInt(entry.target.getAttribute('data-target'),10);
+      const duration = 1400;
+      const start = performance.now();
+      function step(now){
+        const p = Math.min(1, (now-start)/duration);
+        const eased = 1 - Math.pow(1-p, 3);
+        entry.target.textContent = Math.floor(eased*target);
+        if(p<1) requestAnimationFrame(step);
+        else entry.target.textContent = target + (target>=100 ? '+' : '');
+      }
+      requestAnimationFrame(step);
+    }
+  });
+}, {threshold:0.5});
+statEls.forEach(el=>observer.observe(el));
+</script>
+</body>
+</html>
