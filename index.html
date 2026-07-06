@@ -464,6 +464,9 @@
   </div>
   <button class="siu-btn" id="siuBtn">Trigger the Celebration</button>
   <p class="siu-caption">Click it. Arms out, chin up, net still rippling — the most copied celebration in football.</p>
+
+  <!-- afsal: Siuuu shout sound effect -->
+  <audio id="siuAudio" src="https://tiengdong.com/wp-content/uploads/am-thanh-siuuu-www_tiengdong_com.mp3" preload="auto"></audio>
 </section>
 
 <footer>
@@ -601,6 +604,7 @@
 })();
 
 /* ============ SIU BUTTON WIRING ============ */
+const siuAudio = document.getElementById('siuAudio');
 const siuBtn = document.getElementById('siuBtn');
 const celebrant = document.getElementById('celebrant');
 const shoutText = document.getElementById('shoutText');
@@ -627,6 +631,13 @@ siuBtn.addEventListener('click', ()=>{
     void celebrant.offsetWidth;
     celebrant.classList.add('jump');
   }
+
+  // play the Siuuu shout sound
+  try{
+    siuAudio.currentTime = 0;
+    siuAudio.volume = 1;
+    siuAudio.play().catch(()=>{ /* ignored: browser blocked autoplay until user gesture, but this click IS a gesture */ });
+  }catch(e){}
 
   if(window.__triggerBurst) window.__triggerBurst();
   siuBtn.textContent = 'SIUUUUUU!';
